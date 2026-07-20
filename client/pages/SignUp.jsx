@@ -19,7 +19,8 @@ function SignUp() {
       console.log(user);
       setLoading(false);
       localStorage.setItem("Token", "mock_token");
-      localStorage.setItem("email", user.email);
+      localStorage.setItem("uid", response.data.id);
+      localStorage.setItem("isAdmin", response.data.isAdmin);
       navigate("/dashboard");
     } catch (error) {
       setLoading(false);

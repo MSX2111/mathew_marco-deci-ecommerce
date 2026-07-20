@@ -1,6 +1,7 @@
 import api from "../axios/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import NavBar from "../components/NavBar";
 
 function LogIn() {
   const navigate = useNavigate();
@@ -14,8 +15,10 @@ function LogIn() {
       const user = { email, password };
       const response = await api.post("/users/login", user);
       console.log("Logged in successfully");
+      console.log(response.data);
       localStorage.setItem("Token", "mock_token");
       localStorage.setItem("uid", response.data.id);
+      localStorage.setItem("isAdmin", response.data.isAdmin);
       setLoading(false);
       navigate("/dashboard");
     } catch (error) {

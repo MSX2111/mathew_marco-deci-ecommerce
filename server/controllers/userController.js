@@ -27,7 +27,7 @@ async function loginUser(req, res) {
     if (!user) {
       return res.status(401).json({ message: "No such user exists" });
     }
-    delete user.password;
+    console.log(user);
     return res.status(200).json(user);
     console.log(user);
   } catch (error) {

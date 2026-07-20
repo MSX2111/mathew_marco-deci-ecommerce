@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../axios/axiosInstance";
+import NavBar from "../components/NavBar";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -51,6 +52,7 @@ const Dashboard = () => {
 
   return (
     <>
+      <NavBar />
       <h1>{user.name}'s dashboard</h1>
       <button
         onClick={() => {
