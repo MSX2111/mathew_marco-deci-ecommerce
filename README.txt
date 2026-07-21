@@ -2,6 +2,10 @@
 
 A fullstack e-commerce application with a React + Vite storefront and an Express backend that uses PostgreSQL, MongoDB, and Prisma.
 
+## GitHub repository
+
+https://github.com/MSX2111/mathew_marco-deci-ecommerce
+
 ## Tools used
 
 - Frontend: React 19, Vite, Axios, plain CSS
@@ -35,10 +39,6 @@ docker compose up --build
 ```
 
 This brings up the frontend, backend, PostgreSQL, and MongoDB services.
-
-## GitHub repository
-
-https://github.com/MSX2111/mathew_marco-deci-ecommerce
 
 ## Environment variables
 
