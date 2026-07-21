@@ -43,7 +43,7 @@ const Home = () => {
     <>
       <NavBar />
       <div className="page-shell home-page">
-        {/* HERO PROMOTIONS DISPLAY GRID */}
+        {}
         <section className="promotions-hero-banner">
           {homeData.promotions.map((promo) => (
             <div key={promo.id} className="promo-banner-card">
@@ -63,7 +63,7 @@ const Home = () => {
           ))}
         </section>
 
-        {/* CATEGORY GRID NAVIGATION MATRIX */}
+        {}
         <section className="categories-navigation-section">
           <h2>Shop by Department</h2>
           <div className="categories-grid-row">
@@ -80,7 +80,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* FEATURED PRODUCTS HORIZONTAL ROW */}
+        {}
         <section className="featured-products-section">
           <h2>Featured Essentials</h2>
           <div className="featured-products-grid">

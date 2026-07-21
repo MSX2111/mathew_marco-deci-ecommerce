@@ -14,14 +14,17 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     languageOptions: {
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.jest, // <--- ADD THIS LINE HERE
+      },
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
   js.configs.recommended,
   {
     rules: {
-      "no-unused-vars": "off", // Disables the rule completely
+      "no-unused-vars": "off",
     },
   },
 ]);

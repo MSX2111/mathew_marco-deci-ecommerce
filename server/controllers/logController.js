@@ -3,13 +3,13 @@ import ActivityLog from "../models/activityLog.js";
 async function findActivityLogs(req, res) {
   try {
     const page = Number(req.query.page) || 1;
-    const limit = 20; // Enforces exactly 20 logs per page
+    const limit = 20; 
     const skip = (page - 1) * limit;
 
-    // Run parallel queries across MongoDB indices for maximum speed
+    
     const [logs, totalCount] = await Promise.all([
       ActivityLog.find()
-        .sort({ createdAt: -1 }) // Newest events show at top row
+        .sort({ createdAt: -1 }) 
         .skip(skip)
         .limit(limit),
       ActivityLog.countDocuments(),

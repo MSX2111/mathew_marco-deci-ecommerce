@@ -1,0 +1,25 @@
+.dashboard-page {
+  display: grid;
+  gap: 28px;
+}
+
+.dashboard-headline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.dashboard-headline button {
+  align-self: flex-start;
+}
+
+.form-card {
+  padding: 36px;
+}
+
+.dashboard-page form {
+  display: grid;
+  gap: 18px;
+}

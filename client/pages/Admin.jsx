@@ -3,14 +3,14 @@ import NavBar from "../components/NavBar";
 import api from "../axios/axiosInstance";
 
 const Admin = () => {
-  // Product Catalog Management State
+  
   const [products, setProducts] = useState([]);
   const [productPage, setProductPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
 
-  // NEW: MongoDB System Logging Pagination States
+  
   const [logs, setLogs] = useState([]);
   const [logPage, setLogPage] = useState(1);
   const [totalLogs, setTotalLogs] = useState(0);
@@ -27,7 +27,7 @@ const Admin = () => {
   const ITEMS_PER_PAGE = 4;
   const LOGS_PER_PAGE = 20;
 
-  // Effect 1: Fetches Product items from PostgreSQL database via Prisma
+  
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -43,7 +43,7 @@ const Admin = () => {
     fetchProducts();
   }, [productPage, refreshTrigger]);
 
-  // Effect 2: NEW - Fetches paginated activity log records from MongoDB via Mongoose
+  
   useEffect(() => {
     async function fetchActivityLogs() {
       try {
@@ -122,14 +122,14 @@ const Admin = () => {
     setEditingProductId(null);
   };
 
-  // Math conversions for catalog page structures
+  
   const totalProductPages = Math.ceil(totalProducts / ITEMS_PER_PAGE) || 1;
   const productPageNumbers = Array.from(
     { length: totalProductPages },
     (_, i) => i + 1,
   );
 
-  // NEW: Math conversions for system logs view structure
+  
   const totalLogPages = Math.ceil(totalLogs / LOGS_PER_PAGE) || 1;
   const logPageNumbers = Array.from({ length: totalLogPages }, (_, i) => i + 1);
 
@@ -153,7 +153,7 @@ const Admin = () => {
       <div className="page-shell admin-page">
         <h1 className="page-heading">Admin Management Dashboard</h1>
 
-        {/* SECTION 1: CATALOG MODIFICATION ENTRY FORM */}
+        {}
         <div className="admin-form-container">
           <h3>
             {editingProductId
@@ -239,7 +239,7 @@ const Admin = () => {
           </form>
         </div>
 
-        {/* SECTION 2: ACTIVE INVENTORY LIST SHELF */}
+        {}
         <h3>Active Catalog Inventory</h3>
         <div className="admin-product-list-table">
           {products.map((product) => (
@@ -273,7 +273,7 @@ const Admin = () => {
           ))}
         </div>
 
-        {/* Product List Slicing controls */}
+        {}
         <div className="pagination-controls">
           <button
             className="btn btn-secondary"
@@ -302,7 +302,7 @@ const Admin = () => {
           </button>
         </div>
 
-        {/* NEW SECTION 3: MONGODB AUDIT ACTIVITY LOGS MATRIX */}
+        {}
         <div className="admin-audit-logs-section">
           <h3>System Activity Audit Trails (MongoDB)</h3>
 
@@ -351,7 +351,7 @@ const Admin = () => {
             </table>
           </div>
 
-          {/* Dedicated Logging Slicing Pagination Controls Panel Row */}
+          {}
           <div className="pagination-controls admin-logs-pagination">
             <button
               onClick={() => setLogPage((p) => Math.max(p - 1, 1))}

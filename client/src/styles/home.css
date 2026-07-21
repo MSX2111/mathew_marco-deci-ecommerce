@@ -1,0 +1,93 @@
+.home-page {
+  display: grid;
+  gap: 36px;
+}
+
+.promotions-hero-banner,
+.featured-products-grid,
+.categories-grid-row {
+  display: grid;
+  gap: 20px;
+}
+
+.promotions-hero-banner {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.promo-banner-card {
+  position: relative;
+  min-height: 310px;
+  overflow: hidden;
+}
+
+.promo-banner-card img {
+  object-fit: cover;
+  height: 100%;
+}
+
+.promo-overlay-text {
+  position: absolute;
+  inset: 0;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(17, 42, 78, 0.14),
+    rgba(17, 42, 78, 0.72)
+  );
+  color: white;
+}
+
+.promo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 216, 95, 0.22);
+  color: #4f3d0d;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}
+
+.category-navigation-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  gap: 12px;
+  padding: 24px;
+}
+
+.category-navigation-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.category-navigation-card span {
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.featured-item-card {
+  padding: 24px;
+}
+
+.featured-item-card h3 {
+  margin: 18px 0 10px;
+}
+
+.featured-item-desc {
+  color: var(--muted);
+  min-height: 56px;
+}
+
+.featured-item-price {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent-strong);
+  font-weight: 700;
+}

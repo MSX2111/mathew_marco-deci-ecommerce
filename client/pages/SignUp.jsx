@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 function SignUp() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
   async function handleSignUp(e) {
     e.preventDefault();
     setLoading(true);
@@ -15,8 +16,6 @@ function SignUp() {
       const password = e.target.password.value;
       const user = { name, email, password };
       const response = await api.post("/users/signup", user);
-      console.log(response);
-      console.log(user);
       setLoading(false);
       localStorage.setItem("Token", "mock_token");
       localStorage.setItem("uid", response.data.id);
@@ -24,27 +23,41 @@ function SignUp() {
       navigate("/dashboard");
     } catch (error) {
       setLoading(false);
-      console.log(error.message);
+      console.log(error?.message || error);
     }
   }
+
   return (
     <div className="page-shell auth-page">
       <div className="form-card">
         <h1 className="page-heading">Create your account</h1>
         <form onSubmit={handleSignUp} className="auth-form">
-          <label>
+          <label htmlFor="name">
             Name
-            <input type="text" id="name" placeholder="Name" required />
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Name"
+              required
+            />
           </label>
-          <label>
+          <label htmlFor="email">
             Email
-            <input type="email" id="email" placeholder="Email" required />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Email"
+              required
+            />
           </label>
-          <label>
+          <label htmlFor="password">
             Password
             <input
               type="password"
               id="password"
+              name="password"
               placeholder="Password"
               required
             />

@@ -1,0 +1,84 @@
+.product-detail-page {
+  display: grid;
+  gap: 32px;
+}
+
+.product-detail-view-container {
+  display: grid;
+  gap: 32px;
+}
+
+.product-detail-layout-card {
+  display: grid;
+  gap: 32px;
+  padding: 28px;
+}
+
+.detail-hero-image {
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  max-height: 420px;
+}
+
+.product-info-column {
+  display: grid;
+  gap: 16px;
+}
+
+.product-category-tag {
+  display: inline-flex;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.product-price-label {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.product-description-body {
+  color: var(--muted);
+}
+
+.back-to-catalog-btn {
+  width: fit-content;
+}
+
+.reviews-section-wrapper {
+  padding: 28px;
+}
+
+.reviews-feed-list {
+  display: grid;
+  gap: 18px;
+}
+
+.individual-review-node {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.review-metadata-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.review-date-timestamp {
+  color: var(--muted);
+}
+
+.review-controls,
+.edit-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.review-comment-body {
+  margin: 0;
+  color: var(--text);
+}

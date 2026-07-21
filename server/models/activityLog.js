@@ -25,7 +25,7 @@ const activityLogSchema = new mongoose.Schema({
   },
 });
 
-// ABSOLUTE FIX: Safely retrieve the model by string lookup if it exists
+
 let ActivityLog;
 try {
   ActivityLog = mongoose.model("ActivityLog");

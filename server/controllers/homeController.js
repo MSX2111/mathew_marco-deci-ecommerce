@@ -2,13 +2,13 @@ import prisma from "../utils/prismaClient.js";
 
 async function getHomeData(req, res) {
   try {
-    // 1. Fetch a maximum of 4 featured products for the main shelf layout
+    
     const featuredProducts = await prisma.Products.findMany({
       take: 4,
       orderBy: { id: "desc" },
     });
 
-    // 2. Define static promotional banners to avoid schema bloat
+    
     const promotions = [
       {
         id: 1,
@@ -26,7 +26,7 @@ async function getHomeData(req, res) {
       },
     ];
 
-    // 3. Define structured category anchors for landing grids
+    
     const categories = [
       { id: "computers", name: "Computers", itemCount: "Browse Systems" },
       { id: "phones", name: "Phones", itemCount: "Explore Devices" },

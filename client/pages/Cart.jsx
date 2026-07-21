@@ -23,14 +23,14 @@ const Cart = () => {
   }, [refreshTrigger]);
 
   const handleQuantityChange = async (productId, newQuantity) => {
-    if (newQuantity <= 0) return; // Prevent lowering quantities below 1
+    if (newQuantity <= 0) return; 
     try {
       await api.put("/cart", {
         cartId: cart.id,
         productId: productId,
         quantity: newQuantity,
       });
-      setRefreshTrigger((prev) => !prev); // Force reload view data arrays
+      setRefreshTrigger((prev) => !prev); 
     } catch (error) {
       console.error("Failed to alter basket item count:", error);
     }
@@ -39,7 +39,7 @@ const Cart = () => {
   const handleRemoveItem = async (productId) => {
     if (window.confirm("Remove this product from your basket?")) {
       try {
-        // Axios delete method requires data payload wrapping inside a config wrapper object
+        
         await api.delete("/cart", {
           data: {
             cartId: cart.id,
@@ -53,7 +53,7 @@ const Cart = () => {
     }
   };
 
-  // Automated layout loop mathematics calculations
+  
   const cartItems = cart?.items || [];
   const totalPrice = cartItems.reduce((acc, currentItem) => {
     return acc + currentItem.product.price * currentItem.quantity;
@@ -79,7 +79,7 @@ const Cart = () => {
           </div>
         ) : (
           <div>
-            {/* Iterative Product Cards Generation Rows */}
+            {}
             <div className="cart-items-list">
               {cartItems.map((item) => (
                 <div key={item.productId} className="cart-item-card">
@@ -91,7 +91,7 @@ const Cart = () => {
                     <p>Price: ${item.product.price}</p>
                   </div>
 
-                  {/* Operational Inputs Increment Tray Panel */}
+                  {}
                   <div className="cart-item-actions">
                     <label>
                       Qty:
@@ -123,7 +123,7 @@ const Cart = () => {
               ))}
             </div>
 
-            {/* Total Balance Summary Panel Box */}
+            {}
             <div className="cart-summary-box">
               <h3>Order Total Balance</h3>
               <h2>Total: ${totalPrice}</h2>

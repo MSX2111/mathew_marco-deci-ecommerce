@@ -6,7 +6,7 @@ const NavBar = () => {
   return (
     <header className="site-header">
       <div className="brand-bar">
-        <span className="brand-mark">YellowBlue Store</span>
+        <span className="brand-mark">Mock e-commerce</span>
       </div>
       <nav className="primary-nav">
         <NavLink

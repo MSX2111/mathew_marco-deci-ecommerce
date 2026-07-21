@@ -6,6 +6,8 @@ import NavBar from "../components/NavBar";
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [refresh, setRefresh] = useState(true);
+  const navigate = useNavigate();
+
   useEffect(() => {
     async function findUser() {
       try {
@@ -22,6 +24,7 @@ const Dashboard = () => {
   }, [refresh]);
 
   async function handleUpdate(e) {
+    e.preventDefault();
     const uid = localStorage.getItem("uid");
     let name = e.target.name.value;
     let email = e.target.email.value;
@@ -43,8 +46,6 @@ const Dashboard = () => {
       console.error(error.message);
     }
   }
-
-  const navigate = useNavigate();
 
   if (!user) {
     return <div>Loading Data...</div>;
@@ -77,17 +78,28 @@ const Dashboard = () => {
           <form onSubmit={handleUpdate} className="auth-form">
             <label>
               Name
-              <input type="text" id="name" placeholder={user.name} />
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder={user.name}
+              />
             </label>
             <label>
               Email
-              <input type="email" id="email" placeholder={user.email} />
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder={user.email}
+              />
             </label>
             <label>
               Password
               <input
                 type="password"
                 id="password"
+                name="password"
                 placeholder="Change password"
               />
             </label>

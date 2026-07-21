@@ -1,11 +1,11 @@
 import api from "../axios/axiosInstance";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import NavBar from "../components/NavBar";
 
 function LogIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
   async function handleLogIn(e) {
     e.preventDefault();
     setLoading(true);
@@ -27,6 +27,7 @@ function LogIn() {
       setLoading(false);
     }
   }
+
   return (
     <div className="page-shell auth-page">
       <div className="form-card">
@@ -34,13 +35,20 @@ function LogIn() {
         <form onSubmit={handleLogIn} className="auth-form">
           <label>
             Email
-            <input type="email" id="email" placeholder="Email" required />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Email"
+              required
+            />
           </label>
           <label>
             Password
             <input
               type="password"
               id="password"
+              name="password"
               placeholder="Password"
               required
             />
