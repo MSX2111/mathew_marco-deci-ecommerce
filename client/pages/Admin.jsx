@@ -150,8 +150,8 @@ const Admin = () => {
   return (
     <>
       <NavBar />
-      <div>
-        <h2>Admin Management Dashboard</h2>
+      <div className="page-shell admin-page">
+        <h1 className="page-heading">Admin Management Dashboard</h1>
 
         {/* SECTION 1: CATALOG MODIFICATION ENTRY FORM */}
         <div className="admin-form-container">
@@ -223,11 +223,15 @@ const Admin = () => {
             </label>
 
             <div className="form-actions">
-              <button type="submit">
+              <button type="submit" className="btn btn-primary">
                 {editingProductId ? "Update Product" : "Save Product"}
               </button>
               {editingProductId && (
-                <button type="button" onClick={handleCancelEdit}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCancelEdit}
+                >
                   Cancel Edit
                 </button>
               )}
@@ -243,7 +247,7 @@ const Admin = () => {
               <img
                 src={product.imageURL}
                 alt={product.name}
-                style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                className="admin-product-image"
               />
               <div>
                 <h4>{product.name}</h4>
@@ -252,8 +256,16 @@ const Admin = () => {
                 </p>
               </div>
               <div className="admin-row-action-buttons">
-                <button onClick={() => handleEditClick(product)}>Edit</button>
-                <button onClick={() => handleDeleteProduct(product.id)}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => handleEditClick(product)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => handleDeleteProduct(product.id)}
+                >
                   Delete
                 </button>
               </div>
@@ -264,6 +276,7 @@ const Admin = () => {
         {/* Product List Slicing controls */}
         <div className="pagination-controls">
           <button
+            className="btn btn-secondary"
             onClick={() => setProductPage((p) => Math.max(p - 1, 1))}
             disabled={productPage === 1}
           >
@@ -272,13 +285,14 @@ const Admin = () => {
           {productPageNumbers.map((num) => (
             <button
               key={num}
+              className={`btn ${productPage === num ? "active-page" : "btn-secondary"}`}
               onClick={() => setProductPage(num)}
-              className={productPage === num ? "active-page" : ""}
             >
               {num}
             </button>
           ))}
           <button
+            className="btn btn-secondary"
             onClick={() =>
               setProductPage((p) => Math.min(p + 1, totalProductPages))
             }
@@ -289,36 +303,18 @@ const Admin = () => {
         </div>
 
         {/* NEW SECTION 3: MONGODB AUDIT ACTIVITY LOGS MATRIX */}
-        <div
-          className="admin-audit-logs-section"
-          style={{
-            marginTop: "50px",
-            paddingTop: "30px",
-            borderTop: "2px dashed #ccc",
-          }}
-        >
+        <div className="admin-audit-logs-section">
           <h3>System Activity Audit Trails (MongoDB)</h3>
 
-          <div className="logs-table-wrapper" style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-              }}
-            >
+          <div className="logs-table-wrapper">
+            <table className="admin-logs-table">
               <thead>
-                <tr
-                  style={{
-                    backgroundColor: "#f4f4f4",
-                    borderBottom: "2px solid #ddd",
-                  }}
-                >
-                  <th style={{ padding: "10px" }}>Timestamp</th>
-                  <th style={{ padding: "10px" }}>Operator ID</th>
-                  <th style={{ padding: "10px" }}>Action Event</th>
-                  <th style={{ padding: "10px" }}>Entity Identifier</th>
-                  <th style={{ padding: "10px" }}>
+                <tr className="admin-logs-header-row">
+                  <th className="admin-logs-cell">Timestamp</th>
+                  <th className="admin-logs-cell">Operator ID</th>
+                  <th className="admin-logs-cell">Action Event</th>
+                  <th className="admin-logs-cell">Entity Identifier</th>
+                  <th className="admin-logs-cell">
                     Metadata Parameters Payload
                   </th>
                 </tr>
@@ -326,43 +322,26 @@ const Admin = () => {
               <tbody>
                 {logs.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan="5"
-                      style={{ padding: "15px", textAlign: "center" }}
-                    >
+                    <td className="admin-logs-empty" colSpan="5">
                       No logs recorded in the system database yet.
                     </td>
                   </tr>
                 ) : (
                   logs.map((log) => (
-                    <tr
-                      key={log._id}
-                      style={{ borderBottom: "1px solid #eee" }}
-                    >
-                      <td style={{ padding: "10px", fontSize: "13px" }}>
+                    <tr key={log._id} className="admin-log-row">
+                      <td className="admin-logs-cell admin-logs-small">
                         {new Date(log.createdAt).toLocaleString()}
                       </td>
-                      <td style={{ padding: "10px" }}>
+                      <td className="admin-logs-cell">
                         {log.userId === 0 ? "Guest/Anon" : `UID: ${log.userId}`}
                       </td>
-                      <td style={{ padding: "10px" }}>
-                        <span
-                          className={`log-badge-${log.action.toLowerCase()}`}
-                          style={{ fontWeight: "bold" }}
-                        >
-                          {log.action}
-                        </span>
+                      <td className="admin-logs-cell">
+                        <span className="log-badge">{log.action}</span>
                       </td>
-                      <td style={{ padding: "10px", fontSize: "13px" }}>
+                      <td className="admin-logs-cell admin-logs-small">
                         {log.entityId}
                       </td>
-                      <td
-                        style={{
-                          padding: "10px",
-                          fontSize: "12px",
-                          color: "#666",
-                        }}
-                      >
+                      <td className="admin-logs-cell admin-logs-detail">
                         {JSON.stringify(log.details)}
                       </td>
                     </tr>
@@ -373,7 +352,7 @@ const Admin = () => {
           </div>
 
           {/* Dedicated Logging Slicing Pagination Controls Panel Row */}
-          <div className="pagination-controls" style={{ marginTop: "20px" }}>
+          <div className="pagination-controls admin-logs-pagination">
             <button
               onClick={() => setLogPage((p) => Math.max(p - 1, 1))}
               disabled={logPage === 1}

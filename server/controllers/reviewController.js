@@ -1,93 +1,80 @@
 import Review from "../models/reviews.js";
 import logActivity from "../utils/logger.js";
-import prisma from "../utils/prismClient.js";
+import { parseUserId, jsonError, toNumber } from "../utils/http.js";
 
 async function getProductReviews(req, res) {
-  try {
-    const { productId } = req.params;
-
-    const reviews = await Review.find({ productId: Number(productId) }).sort({
-      createdAt: -1,
-    });
-
-    return res.status(200).json(reviews);
-  } catch (error) {
-    console.error("MongoDB Fetch Error:", error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  const productId = toNumber(req.params.productId);
+  const reviews = await Review.find({ productId }).sort({ createdAt: -1 });
+  return res.status(200).json(reviews);
 }
 
 async function createReview(req, res) {
-  try {
-    const { productId, username, comment } = req.body;
-    const activeUserId = req.headers["x-user-id"] || 0;
+  const userId = parseUserId(req);
+  const payload = {
+    productId: toNumber(req.body.productId),
+    username: req.body.username || "Anonymous",
+    comment: (req.body.comment || "").trim(),
+  };
 
-    const newReview = new Review({
-      productId: Number(productId),
-      username,
-      comment: comment.trim(),
-    });
-    const savedReview = await newReview.save();
-
-    await logActivity({
-      userId: activeUserId,
-      action: "REVIEW_CREATE",
-      entityId: savedReview._id,
-      details: { productId: Number(productId), username },
-    });
-
-    return res.status(201).json(savedReview);
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: "Internal server error" });
+  if (!payload.comment) {
+    return jsonError(res, "Review comment is required", 400);
   }
+
+  const savedReview = await new Review(payload).save();
+  await logActivity({
+    userId,
+    action: "REVIEW_CREATE",
+    entityId: savedReview._id,
+    details: { productId: payload.productId, username: payload.username },
+  });
+
+  return res.status(201).json(savedReview);
 }
 
 async function updateReview(req, res) {
-  try {
-    const { reviewId } = req.params;
-    const { comment } = req.body;
-    const activeUserId = req.headers["x-user-id"] || 0;
+  const userId = parseUserId(req);
+  const reviewId = req.params.reviewId;
+  const comment = (req.body.comment || "").trim();
 
-    const updatedReview = await Review.findByIdAndUpdate(
-      reviewId,
-      { comment: comment.trim() },
-      { new: true },
-    );
-
-    await logActivity({
-      userId: activeUserId,
-      action: "REVIEW_UPDATE",
-      entityId: reviewId,
-    });
-
-    return res.status(200).json(updatedReview);
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: "Internal server error" });
+  if (!comment) {
+    return jsonError(res, "Review comment is required", 400);
   }
+
+  const updatedReview = await Review.findByIdAndUpdate(
+    reviewId,
+    { comment },
+    { new: true },
+  );
+  if (!updatedReview) {
+    return jsonError(res, "Review not found", 404);
+  }
+
+  await logActivity({
+    userId,
+    action: "REVIEW_UPDATE",
+    entityId: reviewId,
+  });
+
+  return res.status(200).json(updatedReview);
 }
 
 async function deleteReview(req, res) {
-  try {
-    const { reviewId } = req.params;
-    const activeUserId = req.headers["x-user-id"] || 0;
+  const userId = parseUserId(req);
+  const reviewId = req.params.reviewId;
+  const review = await Review.findByIdAndDelete(reviewId);
 
-    const reviewData = await Review.findById(reviewId);
-    await Review.findByIdAndDelete(reviewId);
-
-    await logActivity({
-      userId: activeUserId,
-      action: "REVIEW_DELETE",
-      entityId: reviewId,
-      details: { targetProductId: reviewData?.productId },
-    });
-
-    return res.status(200).json({ message: "Review deleted successfully" });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: "Internal server error" });
+  if (!review) {
+    return jsonError(res, "Review not found", 404);
   }
+
+  await logActivity({
+    userId,
+    action: "REVIEW_DELETE",
+    entityId: reviewId,
+    details: { targetProductId: review.productId },
+  });
+
+  return res.status(200).json({ message: "Review deleted successfully" });
 }
 
 export default { getProductReviews, createReview, updateReview, deleteReview };

@@ -28,8 +28,7 @@ const Home = () => {
   }, []);
 
   const handleCategoryClick = (categoryKey) => {
-    // Navigate straight to the store with state, or update the filter configuration directly
-    navigate("/store");
+    navigate("/store", { state: { category: categoryKey } });
   };
 
   if (loading)
@@ -43,7 +42,7 @@ const Home = () => {
   return (
     <>
       <NavBar />
-      <div className="home-container">
+      <div className="page-shell home-page">
         {/* HERO PROMOTIONS DISPLAY GRID */}
         <section className="promotions-hero-banner">
           {homeData.promotions.map((promo) => (
@@ -53,7 +52,10 @@ const Home = () => {
                 <span className="promo-badge">{promo.badge}</span>
                 <h2>{promo.title}</h2>
                 <p>{promo.subtitle}</p>
-                <button onClick={() => navigate("/store")}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => navigate("/store")}
+                >
                   Shop Promotion
                 </button>
               </div>
@@ -68,9 +70,8 @@ const Home = () => {
             {homeData.categories.map((cat) => (
               <div
                 key={cat.id}
-                className="category-navigation-card"
+                className="category-navigation-card clickable-card"
                 onClick={() => handleCategoryClick(cat.id)}
-                style={{ cursor: "pointer" }}
               >
                 <h3>{cat.name}</h3>
                 <span>{cat.itemCount} &rarr;</span>
@@ -86,9 +87,8 @@ const Home = () => {
             {homeData.featuredProducts.map((product) => (
               <div
                 key={product.id}
-                className="featured-item-card"
+                className="featured-item-card clickable-card"
                 onClick={() => navigate(`/product/${product.id}`)}
-                style={{ cursor: "pointer" }}
               >
                 <img src={product.imageURL} alt={product.name} />
                 <h3>{product.name}</h3>

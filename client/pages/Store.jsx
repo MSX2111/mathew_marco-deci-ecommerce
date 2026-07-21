@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import api from "../axios/axiosInstance";
 
@@ -7,7 +7,10 @@ const Store = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const location = useLocation();
+  const [selectedCategory, setSelectedCategory] = useState(
+    location.state?.category || "",
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("");
   const [loading, setLoading] = useState(true);
@@ -70,7 +73,7 @@ const Store = () => {
   return (
     <>
       <NavBar />
-      <div>
+      <div className="page-shell store-page">
         <h2>Store Products</h2>
 
         <div className="store-controls-bar">
@@ -122,9 +125,8 @@ const Store = () => {
             displayedProducts.map((product) => (
               <div
                 key={product.id}
-                className="product-card"
+                className="product-card clickable-card"
                 onClick={() => navigate(`/product/${product.id}`)}
-                style={{ cursor: "pointer" }}
               >
                 <img src={product.imageURL} alt={product.name} />
                 <h3>{product.name}</h3>
@@ -140,6 +142,7 @@ const Store = () => {
 
         <div className="pagination-controls">
           <button
+            className="btn btn-secondary"
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
           >
@@ -148,13 +151,14 @@ const Store = () => {
           {pageNumbers.map((num) => (
             <button
               key={num}
+              className={`btn ${currentPage === num ? "active-page" : "btn-secondary"}`}
               onClick={() => setCurrentPage(num)}
-              className={currentPage === num ? "active-page" : ""}
             >
               {num}
             </button>
           ))}
           <button
+            className="btn btn-secondary"
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
           >

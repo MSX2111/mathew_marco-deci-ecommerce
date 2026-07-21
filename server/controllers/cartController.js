@@ -1,137 +1,85 @@
-import prisma from "../utils/prismClient.js";
+import prisma from "../utils/prismaClient.js";
 import logActivity from "../utils/logger.js";
+import { parseUserId, jsonError, toNumber } from "../utils/http.js";
 
 async function getCart(req, res) {
-  try {
-    const activeUserId = req.headers["x-user-id"];
+  const userId = parseUserId(req);
+  if (!userId)
+    return jsonError(res, "User identity required to pull cart", 401);
 
-    if (!activeUserId) {
-      return res
-        .status(401)
-        .json({ message: "User identity required to pull cart" });
-    }
+  const cart = await prisma.cart.findUnique({
+    where: { userId },
+    include: {
+      items: { include: { product: true } },
+    },
+  });
 
-    const cart = await prisma.cart.findUnique({
-      where: { userId: Number(activeUserId) },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
-    if (!cart) {
-      return res.status(200).json({ items: [] });
-    }
-
-    return res.status(200).json(cart);
-  } catch (error) {
-    console.error("Fetch Cart Error:", error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  return res.status(200).json(cart ?? { items: [] });
 }
 
 async function addToCart(req, res) {
-  try {
-    const { productId } = req.body;
-    const activeUserId = req.headers["x-user-id"];
+  const userId = parseUserId(req);
+  if (!userId) return jsonError(res, "User identity required", 401);
 
-    if (!activeUserId) {
-      return res.status(401).json({ message: "User identity required" });
-    }
+  const productId = toNumber(req.body.productId);
+  const cart =
+    (await prisma.cart.findUnique({ where: { userId } })) ||
+    (await prisma.cart.create({ data: { userId } }));
 
-    let cart = await prisma.cart.findUnique({
-      where: { userId: Number(activeUserId) },
-    });
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId: Number(activeUserId) },
-      });
-    }
+  const cartItem = await prisma.cartItem.upsert({
+    where: { cartId_productId: { cartId: cart.id, productId } },
+    update: { quantity: { increment: 1 } },
+    create: { cartId: cart.id, productId, quantity: 1 },
+  });
 
-    const cartItem = await prisma.cartItem.upsert({
-      where: {
-        cartId_productId: { cartId: cart.id, productId: Number(productId) },
-      },
-      update: { quantity: { increment: 1 } },
-      create: {
-        cartId: Math.floor(cart.id),
-        productId: Number(productId),
-        quantity: 1,
-      },
-    });
+  await logActivity({
+    userId,
+    action: "CART_ADD_ITEM",
+    entityId: productId,
+    details: { cartId: cart.id },
+  });
 
-    await logActivity({
-      userId: activeUserId,
-      action: "CART_ADD_ITEM",
-      entityId: productId,
-      details: { cartId: cart.id },
-    });
-
-    return res.status(200).json({ message: "Item added to cart", cartItem });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  return res.status(200).json({ message: "Item added to cart", cartItem });
 }
 
 async function updateQuantity(req, res) {
-  try {
-    const { cartId, productId, quantity } = req.body;
-    const activeUserId = req.headers["x-user-id"] || 0;
+  const userId = parseUserId(req);
+  const cartId = toNumber(req.body.cartId);
+  const productId = toNumber(req.body.productId);
+  const quantity = toNumber(req.body.quantity);
 
-    await prisma.cartItem.update({
-      where: {
-        cartId_productId: {
-          cartId: Number(cartId),
-          productId: Number(productId),
-        },
-      },
-      data: { quantity: Number(quantity) },
-    });
+  await prisma.cartItem.update({
+    where: { cartId_productId: { cartId, productId } },
+    data: { quantity },
+  });
 
-    await logActivity({
-      userId: activeUserId,
-      action: "CART_UPDATE_QTY",
-      entityId: productId,
-      details: { cartId, targetQuantity: Number(quantity) },
-    });
+  await logActivity({
+    userId,
+    action: "CART_UPDATE_QTY",
+    entityId: productId,
+    details: { cartId, targetQuantity: quantity },
+  });
 
-    return res.status(200).json({ message: "Quantity updated" });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  return res.status(200).json({ message: "Quantity updated" });
 }
 
 async function removeItem(req, res) {
-  try {
-    const { cartId, productId } = req.body;
-    const activeUserId = req.headers["x-user-id"] || 0;
+  const userId = parseUserId(req);
+  const cartId = toNumber(req.body.cartId);
+  const productId = toNumber(req.body.productId);
 
-    await prisma.cartItem.delete({
-      where: {
-        cartId_productId: {
-          cartId: Number(cartId),
-          productId: Number(productId),
-        },
-      },
-    });
+  await prisma.cartItem.delete({
+    where: { cartId_productId: { cartId, productId } },
+  });
 
-    await logActivity({
-      userId: activeUserId,
-      action: "CART_REMOVE_ITEM",
-      entityId: productId,
-      details: { cartId },
-    });
+  await logActivity({
+    userId,
+    action: "CART_REMOVE_ITEM",
+    entityId: productId,
+    details: { cartId },
+  });
 
-    return res.status(200).json({ message: "Item removed from cart" });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  return res.status(200).json({ message: "Item removed from cart" });
 }
 
 export default { getCart, addToCart, updateQuantity, removeItem };

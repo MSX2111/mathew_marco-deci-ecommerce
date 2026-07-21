@@ -28,19 +28,32 @@ function LogIn() {
     }
   }
   return (
-    <>
-      <form onSubmit={handleLogIn}>
-        <input type="email" id="email" placeholder="Email" />
-        <input type="password" id="password" placeholder="Password" />
-
-        <button type="submit" disabled={loading}>
-          {loading ? "One moment..." : "Log in"}
-        </button>
-      </form>
-      <p>
-        New member? <Link to="/signup">Sign up now</Link>
-      </p>
-    </>
+    <div className="page-shell auth-page">
+      <div className="form-card">
+        <h1 className="page-heading">Log in to your account</h1>
+        <form onSubmit={handleLogIn} className="auth-form">
+          <label>
+            Email
+            <input type="email" id="email" placeholder="Email" required />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              required
+            />
+          </label>
+          <button className="btn btn-primary" type="submit" disabled={loading}>
+            {loading ? "One moment..." : "Log in"}
+          </button>
+        </form>
+        <p className="auth-switch">
+          New member? <Link to="/signup">Sign up now</Link>
+        </p>
+      </div>
+    </div>
   );
 }
 

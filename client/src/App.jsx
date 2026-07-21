@@ -1,13 +1,9 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
+import "./App.css";
 import SignUp from "../pages/SignUp";
 import Dashboard from "../pages/Dashboard";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "../components/ProtectedRoutes";
 import LogIn from "../pages/LogIn";
-import NavBar from "../components/NavBar";
 import Store from "../pages/Store";
 import Cart from "../pages/Cart";
 import ProductDetail from "../pages/ProductDetail";
@@ -69,7 +65,15 @@ function App() {
             </AdminRoutes>
           }
         />
-        <Route path="*" element={<h1>Page not found (404)</h1>} />
+        <Route
+          path="*"
+          element={
+            <div className="error-page page-shell">
+              <h1>Page not found (404)</h1>
+              <p>The route you requested does not exist.</p>
+            </div>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

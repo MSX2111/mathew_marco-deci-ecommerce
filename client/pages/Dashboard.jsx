@@ -53,22 +53,50 @@ const Dashboard = () => {
   return (
     <>
       <NavBar />
-      <h1>{user.name}'s dashboard</h1>
-      <button
-        onClick={() => {
-          localStorage.removeItem("Token");
-          navigate("/login");
-        }}
-      >
-        Log out
-      </button>
+      <div className="page-shell dashboard-page">
+        <div className="dashboard-headline">
+          <div>
+            <h1 className="page-heading">Welcome back, {user.name}</h1>
+            <p className="section-subtitle">
+              Manage your profile and account settings.
+            </p>
+          </div>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              localStorage.removeItem("Token");
+              navigate("/login");
+            }}
+          >
+            Log out
+          </button>
+        </div>
 
-      <form onSubmit={handleUpdate}>
-        <input type="text" id="name" placeholder={user.name} />
-        <input type="email" id="email" placeholder={user.email} />
-        <input type="text" id="password" placeholder={user.password} />
-        <button type="submit">Update profile</button>
-      </form>
+        <div className="form-card">
+          <h2 className="section-title">Profile information</h2>
+          <form onSubmit={handleUpdate} className="auth-form">
+            <label>
+              Name
+              <input type="text" id="name" placeholder={user.name} />
+            </label>
+            <label>
+              Email
+              <input type="email" id="email" placeholder={user.email} />
+            </label>
+            <label>
+              Password
+              <input
+                type="password"
+                id="password"
+                placeholder="Change password"
+              />
+            </label>
+            <button className="btn btn-primary" type="submit">
+              Update profile
+            </button>
+          </form>
+        </div>
+      </div>
     </>
   );
 };

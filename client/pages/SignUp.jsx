@@ -28,20 +28,36 @@ function SignUp() {
     }
   }
   return (
-    <>
-      <form onSubmit={handleSignUp}>
-        <input type="text" id="name" placeholder="Name" />
-        <input type="email" id="email" placeholder="Email" />
-        <input type="password" id="password" placeholder="Password" />
-
-        <button disabled={loading} type="submit">
-          {loading ? "One moment..." : "Sign up"}
-        </button>
-      </form>
-      <p>
-        Already a member? <Link to="/login">Log in</Link>
-      </p>
-    </>
+    <div className="page-shell auth-page">
+      <div className="form-card">
+        <h1 className="page-heading">Create your account</h1>
+        <form onSubmit={handleSignUp} className="auth-form">
+          <label>
+            Name
+            <input type="text" id="name" placeholder="Name" required />
+          </label>
+          <label>
+            Email
+            <input type="email" id="email" placeholder="Email" required />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              required
+            />
+          </label>
+          <button className="btn btn-primary" disabled={loading} type="submit">
+            {loading ? "One moment..." : "Sign up"}
+          </button>
+        </form>
+        <p className="auth-switch">
+          Already a member? <Link to="/login">Log in</Link>
+        </p>
+      </div>
+    </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import prisma from "../utils/prismClient.js";
+import prisma from "../utils/prismaClient.js";
 
 async function getHomeData(req, res) {
   try {

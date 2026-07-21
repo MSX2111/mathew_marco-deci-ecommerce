@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const reviewSchema = new mongoose.Schema({
   productId: {
-    type: Number, // Matches your PostgreSQL autoincrement integer ID
+    type: Number,
     required: true,
-    index: true, // Speeds up queries when searching reviews by product
+    index: true,
   },
   username: {
     type: String,
@@ -20,5 +20,11 @@ const reviewSchema = new mongoose.Schema({
   },
 });
 
-// Export the native MongoDB Model
-export default mongoose.model("Review", reviewSchema);
+let Review;
+try {
+  Review = mongoose.model("Review");
+} catch (error) {
+  Review = mongoose.model("Review", reviewSchema);
+}
+
+export default Review;

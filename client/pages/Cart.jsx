@@ -70,11 +70,13 @@ const Cart = () => {
   return (
     <>
       <NavBar />
-      <div>
-        <h2>Your Shopping Cart</h2>
+      <div className="page-shell cart-page">
+        <h1 className="page-heading">Your Shopping Cart</h1>
 
         {cartItems.length === 0 ? (
-          <p>Your cart is empty.</p>
+          <div className="form-card">
+            <p>Your cart is empty.</p>
+          </div>
         ) : (
           <div>
             {/* Iterative Product Cards Generation Rows */}
@@ -106,7 +108,10 @@ const Cart = () => {
                       />
                     </label>
 
-                    <button onClick={() => handleRemoveItem(item.productId)}>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handleRemoveItem(item.productId)}
+                    >
                       Remove
                     </button>
                   </div>
@@ -123,6 +128,7 @@ const Cart = () => {
               <h3>Order Total Balance</h3>
               <h2>Total: ${totalPrice}</h2>
               <button
+                className="btn btn-primary"
                 onClick={() =>
                   alert("Proceeding to payment setup module gateway...")
                 }

@@ -1,18 +1,48 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const NavBar = () => {
-  const isAdmin = localStorage.getItem("isAdmin");
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+
   return (
-    <>
-      <nav>
-        <Link to="/">Home</Link>
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/store">Store</Link>
-        <Link to="/cart">Your cart</Link>
-        {isAdmin ? <Link to="/admin">Admin panel</Link> : null}
+    <header className="site-header">
+      <div className="brand-bar">
+        <span className="brand-mark">YellowBlue Store</span>
+      </div>
+      <nav className="primary-nav">
+        <NavLink
+          to="/"
+          className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+        >
+          Home
+        </NavLink>
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+        >
+          Dashboard
+        </NavLink>
+        <NavLink
+          to="/store"
+          className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+        >
+          Store
+        </NavLink>
+        <NavLink
+          to="/cart"
+          className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+        >
+          Cart
+        </NavLink>
+        {isAdmin ? (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+          >
+            Admin
+          </NavLink>
+        ) : null}
       </nav>
-    </>
+    </header>
   );
 };
 
