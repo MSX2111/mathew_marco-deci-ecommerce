@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import navigate hook
+import { useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import api from "../axios/axiosInstance";
 
@@ -8,22 +8,11 @@ const Store = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [refreshTrigger, setRefreshTrigger] = useState(false);
-  const [editingProductId, setEditingProductId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate(); // Initialize navigation router helper
-
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    description: "",
-    price: 0,
-    imageURL: "",
-    category: "",
-  });
-
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  const navigate = useNavigate();
   const ITEMS_PER_PAGE = 4;
 
   useEffect(() => {
@@ -37,12 +26,13 @@ const Store = () => {
         });
         setProducts(response.data.products || []);
         setTotalCount(response.data.totalCount || 0);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     }
     fetchProducts();
-  }, [currentPage, selectedCategory, refreshTrigger]);
+  }, [currentPage, selectedCategory]);
 
   const handleCategoryFilterChange = (e) => {
     setSelectedCategory(e.target.value);
@@ -56,71 +46,6 @@ const Store = () => {
 
   const handleSortChange = (e) => {
     setSortOrder(e.target.value);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewProduct((prev) => ({
-      ...prev,
-      [name]: name === "price" ? parseInt(value, 10) || 0 : value,
-    }));
-  };
-
-  const handleEditClick = (e, product) => {
-    e.stopPropagation();
-    setEditingProductId(product.id);
-    setNewProduct({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      imageURL: product.imageURL,
-      category: product.category,
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editingProductId) {
-        await api.put(`/products/${editingProductId}`, newProduct);
-      } else {
-        await api.post("/products", newProduct);
-      }
-      setNewProduct({
-        name: "",
-        description: "",
-        price: 0,
-        imageURL: "",
-        category: "",
-      });
-      setEditingProductId(null);
-      setRefreshTrigger((prev) => !prev);
-    } catch (error) {
-      console.error("Error saving product:", error);
-    }
-  };
-
-  const handleDeleteProduct = async (e, id) => {
-    e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      try {
-        await api.delete(`/products/${id}`);
-        setRefreshTrigger((prev) => !prev);
-      } catch (error) {
-        console.error("Error deleting product:", error);
-      }
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setNewProduct({
-      name: "",
-      description: "",
-      price: 0,
-      imageURL: "",
-      category: "",
-    });
-    setEditingProductId(null);
   };
 
   const displayedProducts = [...products]
@@ -137,92 +62,16 @@ const Store = () => {
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE) || 1;
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  if (loading) {
+    return <h1>Loading...</h1>;
+  }
+
   return (
     <>
       <NavBar />
       <div>
         <h2>Store Products</h2>
-
-        {isAdmin && (
-          <div className="admin-form-container">
-            <h3>
-              {editingProductId ? "Modify Product" : "Create New Product"}
-            </h3>
-            <form onSubmit={handleSubmit}>
-              <label>
-                Product Name:
-                <input
-                  type="text"
-                  name="name"
-                  value={newProduct.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </label>
-
-              <label>
-                Category:
-                <select
-                  name="category"
-                  value={newProduct.category}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="" disabled>
-                    Select a category
-                  </option>
-                  <option value="computers">Computers</option>
-                  <option value="phones">Phones</option>
-                  <option value="accessories">Accessories</option>
-                </select>
-              </label>
-
-              <label>
-                Description:
-                <textarea
-                  name="description"
-                  value={newProduct.description}
-                  onChange={handleInputChange}
-                  required
-                />
-              </label>
-
-              <label>
-                Price ($):
-                <input
-                  type="number"
-                  name="price"
-                  value={newProduct.price}
-                  onChange={handleInputChange}
-                  required
-                  min="0"
-                />
-              </label>
-
-              <label>
-                Image URL:
-                <input
-                  type="url"
-                  name="imageURL"
-                  value={newProduct.imageURL}
-                  onChange={handleInputChange}
-                  required
-                />
-              </label>
-
-              <div className="form-actions">
-                <button type="submit">
-                  {editingProductId ? "Update Product" : "Save Product"}
-                </button>
-                {editingProductId && (
-                  <button type="button" onClick={handleCancelEdit}>
-                    Cancel Edit
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-        )}
 
         <div className="store-controls-bar">
           <div className="search-container">
@@ -271,7 +120,6 @@ const Store = () => {
             <p>No products found matching your criteria.</p>
           ) : (
             displayedProducts.map((product) => (
-              /* Modified card to push dynamic navigate requests to the router */
               <div
                 key={product.id}
                 className="product-card"
@@ -285,17 +133,6 @@ const Store = () => {
                 </p>
                 <p>{product.description}</p>
                 <span>${product.price}</span>
-
-                {isAdmin && (
-                  <div className="admin-actions">
-                    <button onClick={(e) => handleEditClick(e, product)}>
-                      Edit
-                    </button>
-                    <button onClick={(e) => handleDeleteProduct(e, product.id)}>
-                      Delete
-                    </button>
-                  </div>
-                )}
               </div>
             ))
           )}

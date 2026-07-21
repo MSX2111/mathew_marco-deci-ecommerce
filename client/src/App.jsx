@@ -11,11 +11,22 @@ import NavBar from "../components/NavBar";
 import Store from "../pages/Store";
 import Cart from "../pages/Cart";
 import ProductDetail from "../pages/ProductDetail";
+import Home from "../pages/Home";
+import AdminRoutes from "../components/AdminRoutes";
+import Admin from "../pages/Admin";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<LogIn />} />
         <Route
@@ -48,6 +59,14 @@ function App() {
             <ProtectedRoute>
               <ProductDetail />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoutes>
+              <Admin />
+            </AdminRoutes>
           }
         />
         <Route path="*" element={<h1>Page not found (404)</h1>} />
