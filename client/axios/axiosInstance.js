@@ -1,11 +1,24 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/",
+  baseURL: "http://localhost:5000",
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 5000,
 });
+
+// Automatically intercept every outgoing request and attach the user ID header
+api.interceptors.request.use(
+  (config) => {
+    const uid = localStorage.getItem("uid");
+    if (uid) {
+      config.headers["x-user-id"] = uid; // Inject user ID dynamically from localStorage
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 export default api;

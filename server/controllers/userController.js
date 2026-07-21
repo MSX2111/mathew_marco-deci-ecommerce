@@ -1,14 +1,24 @@
-import prisma from "../utils/prismaClient.js";
+import prisma from "../utils/prismClient.js";
+import logActivity from "../utils/logger.js";
+import sendWelcomeEmail from "../utils/mailer.js";
 
 async function createUser(req, res) {
-  console.log(req.body);
   try {
     const user = await prisma.User.create({ data: req.body });
     if (user) {
       delete user.password;
     }
+
+    await logActivity({
+      userId: user.id,
+      action: "USER_REGISTER",
+      entityId: user.id,
+      details: { email: req.body.email, name: req.body.name },
+    });
+
+    sendWelcomeEmail(req.body.email, req.body.name);
+
     return res.status(201).json(user);
-    console.log("User created");
   } catch (error) {
     console.error(error.message);
     return res.status(500).json({ message: "Failed to create user" });
@@ -16,7 +26,6 @@ async function createUser(req, res) {
 }
 
 async function loginUser(req, res) {
-  console.log(req.body.email);
   try {
     const user = await prisma.User.findFirst({
       where: {
@@ -27,9 +36,15 @@ async function loginUser(req, res) {
     if (!user) {
       return res.status(401).json({ message: "No such user exists" });
     }
-    console.log(user);
+
+    await logActivity({
+      userId: user.id,
+      action: "USER_LOGIN",
+      entityId: user.id,
+      details: { email: user.email },
+    });
+
     return res.status(200).json(user);
-    console.log(user);
   } catch (error) {
     console.error(error.message);
     return res.status(500).json({ message: "Internal server error" });
@@ -39,9 +54,7 @@ async function loginUser(req, res) {
 async function findUser(req, res) {
   try {
     const user = await prisma.User.findFirst({
-      where: {
-        id: Number(req.body.uid),
-      },
+      where: { id: Number(req.body.uid) },
     });
     return res.status(200).json(user);
   } catch (error) {
@@ -52,17 +65,22 @@ async function findUser(req, res) {
 
 async function updateUser(req, res) {
   try {
-    console.log(req.body);
     const user = await prisma.User.update({
-      where: {
-        id: Number(req.body.uid),
-      },
+      where: { id: Number(req.body.uid) },
       data: {
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
       },
     });
+
+    await logActivity({
+      userId: user.id,
+      action: "USER_UPDATE",
+      entityId: user.id,
+      details: { updatedFields: Object.keys(req.body) },
+    });
+
     return res.status(200).json(user);
   } catch (error) {
     console.error(error.message);

@@ -1,58 +1,22 @@
-import prisma from "../utils/prismaClient.js";
+import prisma from "../utils/prismClient.js";
+import logActivity from "../utils/logger.js";
 
-// Add an item to the cart (or increment quantity)
-async function addToCart(req, res) {
-  try {
-    const { productId } = req.body;
-    const userId = 1; // Temporary placeholder until you add Auth middleware
-
-    // 1. Ensure the user has a Cart. If not, findOrCreate it.
-    let cart = await prisma.cart.findUnique({
-      where: { userId: Number(userId) },
-    });
-
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId: Number(userId) },
-      });
-    }
-
-    // 2. Use Upsert to create the CartItem or increment quantity if it exists
-    const cartItem = await prisma.cartItem.upsert({
-      where: {
-        cartId_productId: {
-          cartId: cart.id,
-          productId: Number(productId),
-        },
-      },
-      update: {
-        quantity: { increment: 1 }, // If it exists, add 1 to quantity
-      },
-      create: {
-        cartId: cart.id,
-        productId: Number(productId),
-        quantity: 1, // If it's new, set quantity to 1
-      },
-    });
-
-    return res.status(200).json({ message: "Item added to cart", cartItem });
-  } catch (error) {
-    console.error("Cart Database Error:", error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-}
-
-// Fetch the complete cart details with product metadata for Cart.jsx
 async function getCart(req, res) {
   try {
-    const userId = 1; // Temporary placeholder
+    const activeUserId = req.headers["x-user-id"];
+
+    if (!activeUserId) {
+      return res
+        .status(401)
+        .json({ message: "User identity required to pull cart" });
+    }
 
     const cart = await prisma.cart.findUnique({
-      where: { userId: Number(userId) },
+      where: { userId: Number(activeUserId) },
       include: {
         items: {
           include: {
-            product: true, // Pulls Name, Price, and imageURL from Products table
+            product: true,
           },
         },
       },
@@ -69,43 +33,83 @@ async function getCart(req, res) {
   }
 }
 
-// ... keep your existing getCart and addToCart logic above
+async function addToCart(req, res) {
+  try {
+    const { productId } = req.body;
+    const activeUserId = req.headers["x-user-id"];
 
-// Update quantity directly from the input counter
+    if (!activeUserId) {
+      return res.status(401).json({ message: "User identity required" });
+    }
+
+    let cart = await prisma.cart.findUnique({
+      where: { userId: Number(activeUserId) },
+    });
+    if (!cart) {
+      cart = await prisma.cart.create({
+        data: { userId: Number(activeUserId) },
+      });
+    }
+
+    const cartItem = await prisma.cartItem.upsert({
+      where: {
+        cartId_productId: { cartId: cart.id, productId: Number(productId) },
+      },
+      update: { quantity: { increment: 1 } },
+      create: {
+        cartId: Math.floor(cart.id),
+        productId: Number(productId),
+        quantity: 1,
+      },
+    });
+
+    await logActivity({
+      userId: activeUserId,
+      action: "CART_ADD_ITEM",
+      entityId: productId,
+      details: { cartId: cart.id },
+    });
+
+    return res.status(200).json({ message: "Item added to cart", cartItem });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 async function updateQuantity(req, res) {
   try {
     const { cartId, productId, quantity } = req.body;
+    const activeUserId = req.headers["x-user-id"] || 0;
 
-    // Guard against negative numbers or string formatting issues
-    if (Number(quantity) <= 0) {
-      return res
-        .status(400)
-        .json({ message: "Quantity must be greater than 0" });
-    }
-
-    const updatedItem = await prisma.cartItem.update({
+    await prisma.cartItem.update({
       where: {
         cartId_productId: {
           cartId: Number(cartId),
           productId: Number(productId),
         },
       },
-      data: {
-        quantity: Number(quantity),
-      },
+      data: { quantity: Number(quantity) },
     });
 
-    return res.status(200).json(updatedItem);
+    await logActivity({
+      userId: activeUserId,
+      action: "CART_UPDATE_QTY",
+      entityId: productId,
+      details: { cartId, targetQuantity: Number(quantity) },
+    });
+
+    return res.status(200).json({ message: "Quantity updated" });
   } catch (error) {
-    console.error("Update Quantity Error:", error.message);
+    console.error(error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 }
 
-// Remove an item entirely from the composite record
 async function removeItem(req, res) {
   try {
     const { cartId, productId } = req.body;
+    const activeUserId = req.headers["x-user-id"] || 0;
 
     await prisma.cartItem.delete({
       where: {
@@ -116,13 +120,18 @@ async function removeItem(req, res) {
       },
     });
 
-    return res
-      .status(200)
-      .json({ message: "Item removed from cart successfully" });
+    await logActivity({
+      userId: activeUserId,
+      action: "CART_REMOVE_ITEM",
+      entityId: productId,
+      details: { cartId },
+    });
+
+    return res.status(200).json({ message: "Item removed from cart" });
   } catch (error) {
-    console.error("Remove Item Error:", error.message);
+    console.error(error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 }
 
-export default { addToCart, getCart, updateQuantity, removeItem };
+export default { getCart, addToCart, updateQuantity, removeItem };

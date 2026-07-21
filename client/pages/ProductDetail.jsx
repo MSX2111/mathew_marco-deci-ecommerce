@@ -4,46 +4,105 @@ import NavBar from "../components/NavBar";
 import api from "../axios/axiosInstance";
 
 const ProductDetail = () => {
-  const { id } = useParams(); // Extracts the integer ID directly from the URL link string
+  const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [username, setUsername] = useState("");
+  const [newComment, setNewComment] = useState("");
+
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editedCommentText, setEditedCommentText] = useState("");
+
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+
   useEffect(() => {
-    async function fetchProductData() {
+    async function fetchProductAndReviews() {
       try {
         setLoading(true);
-        // Hits your working backend route path handler: router.get("/:id", ...)
-        const response = await api.get(`/products/${id}`);
-        setProduct(response.data);
+        const [productRes, reviewsRes] = await Promise.all([
+          api.get(`/products/${id}`),
+          api.get(`/reviews/${id}`),
+        ]);
+        setProduct(productRes.data);
+        setReviews(reviewsRes.data);
       } catch (err) {
-        console.error("Error loading product record details:", err);
+        console.error("Error loading product layout:", err);
         setError("Product not found or database record entry is missing.");
       } finally {
         setLoading(false);
       }
     }
-    fetchProductData();
+    fetchProductAndReviews();
   }, [id]);
 
   const handleAddToCart = async () => {
     try {
-      // Hits your new backend router POST /cart/add
-      await api.post("/cart", { productId: id });
+      await api.post("/cart/add", { productId: id });
       alert("Product added to your cart successfully!");
-      navigate("/store"); // Optional redirect back to catalog
     } catch (error) {
       console.error("Failed to append item to cart:", error);
-      alert("Could not add item to cart.");
     }
   };
 
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post("/reviews", {
+        productId: id,
+        username: username,
+        comment: newComment,
+      });
+      setReviews((prev) => [response.data, ...prev]);
+      setNewComment("");
+      setUsername("");
+    } catch (error) {
+      console.error("Failed to transmit review payload:", error);
+    }
+  };
+
+  const handleEditClick = (review) => {
+    setEditingReviewId(review._id);
+    setEditedCommentText(review.comment);
+  };
+
+  const handleUpdateReview = async (reviewId) => {
+    try {
+      const response = await api.put(`/reviews/${reviewId}`, {
+        comment: editedCommentText,
+      });
+      setReviews((prev) =>
+        prev.map((r) => (r._id === reviewId ? response.data : r)),
+      );
+      setEditingReviewId(null);
+      setEditedCommentText("");
+    } catch (error) {
+      console.error("Failed to modify target review on MongoDB:", error);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (
+      window.confirm(
+        "Are you sure you want to permanently delete this comment?",
+      )
+    ) {
+      try {
+        await api.delete(`/reviews/${reviewId}`);
+        setReviews((prev) => prev.filter((r) => r._id !== reviewId));
+      } catch (error) {
+        console.error("Failed to drop target document from MongoDB:", error);
+      }
+    }
+  };
   if (loading)
     return (
       <>
         <NavBar />
-        <div>Loading product details...</div>
+        <div>Loading details...</div>
       </>
     );
   if (error)
@@ -88,8 +147,82 @@ const ProductDetail = () => {
               onClick={handleAddToCart}
               className="add-to-cart-action-btn"
             >
-              Add to Cart
+              Add to Cart Basket
             </button>
+          </div>
+        </div>
+
+        <div className="reviews-section-wrapper">
+          <h3>Customer Feedback & Comments</h3>
+
+          <form onSubmit={handleSubmitReview} className="add-review-form">
+            <h4>Leave a Comment</h4>
+            <label>
+              Your Name:
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="John Doe (Optional)"
+              />
+            </label>
+            <label>
+              Comment:
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Write your review here..."
+                required
+              />
+            </label>
+            <button type="submit">Submit Comment</button>
+          </form>
+
+          <div className="reviews-feed-list">
+            {reviews.length === 0 ? (
+              <p>No comments written for this item yet. Be the first!</p>
+            ) : (
+              reviews.map((review) => (
+                <div key={review._id} className="individual-review-node">
+                  <div className="review-metadata-header">
+                    <strong>{review.username || "Anonymous"}</strong>
+                    <span className="review-date-timestamp">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  {editingReviewId === review._id ? (
+                    <div className="edit-review-inline-wrapper">
+                      <textarea
+                        value={editedCommentText}
+                        onChange={(e) => setEditedCommentText(e.target.value)}
+                        required
+                      />
+                      <div className="edit-review-actions">
+                        <button onClick={() => handleUpdateReview(review._id)}>
+                          Save Changes
+                        </button>
+                        <button onClick={() => setEditingReviewId(null)}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="review-comment-body">{review.comment}</p>
+                      <div className="review-controls">
+                        <button onClick={() => handleEditClick(review)}>
+                          Edit
+                        </button>
+                        <button onClick={() => handleDeleteReview(review._id)}>
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

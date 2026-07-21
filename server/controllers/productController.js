@@ -1,4 +1,5 @@
-import prisma from "../utils/prismaClient.js";
+import prisma from "../utils/prismClient.js";
+import logActivity from "../utils/logger.js";
 
 async function findProducts(req, res) {
   try {
@@ -7,18 +8,15 @@ async function findProducts(req, res) {
     const limit = 4;
     const skip = (page - 1) * limit;
 
-    // 1. Build basic execution query blocks
     let findManyQuery = { skip, take: limit };
     let countQuery = {};
 
-    // 2. Only inject the filter key if a category value is present
     if (category && category.trim() !== "") {
       const whereClause = { category: category };
       findManyQuery.where = whereClause;
       countQuery.where = whereClause;
     }
 
-    // 3. Request exactly 4 rows along with total items filtered by this criteria
     const [products, totalCount] = await prisma.$transaction([
       prisma.Products.findMany(findManyQuery),
       prisma.Products.count(countQuery),
@@ -31,95 +29,16 @@ async function findProducts(req, res) {
   }
 }
 
-async function createProduct(req, res) {
-  try {
-    // Destructuring to ensure clean data validation types matching schema
-    const { name, description, price, imageURL, category } = req.body;
-
-    const product = await prisma.Products.create({
-      data: {
-        name,
-        description,
-        price: Number(price), // Enforces Integer type
-        imageURL,
-        category,
-      },
-    });
-    return res.status(201).json(product);
-  } catch (error) {
-    console.error("Database Error:", error.message);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-}
-
-// 1. UPDATE PRODUCT FUNCTION LOGIC
-async function updateProduct(req, res) {
-  try {
-    const { id } = req.params;
-    const { name, description, price, imageURL, category } = req.body;
-
-    const updatedProduct = await prisma.Products.update({
-      where: {
-        id: Number(id), // Converts string parameter "id" into Int type
-      },
-      data: {
-        name,
-        description,
-        price: Number(price), // Enforces Integer type
-        imageURL,
-        category,
-      },
-    });
-
-    return res.status(200).json(updatedProduct);
-  } catch (error) {
-    console.error("Database Error:", error.message);
-
-    // Fallback if item is not found in database record rows
-    if (error.code === "P2025") {
-      return res.status(404).json({ message: "Product record not found" });
-    }
-
-    return res.status(500).json({ message: "Internal server error" });
-  }
-}
-
-// 2. DELETE PRODUCT FUNCTION LOGIC
-async function deleteProduct(req, res) {
-  try {
-    const { id } = req.params;
-
-    await prisma.Products.delete({
-      where: {
-        id: Number(id), // Converts string parameter "id" into Int type
-      },
-    });
-
-    return res.status(200).json({ message: "Product successfully deleted" });
-  } catch (error) {
-    console.error("Database Error:", error.message);
-
-    // Fallback if item is not found in database record rows
-    if (error.code === "P2025") {
-      return res.status(404).json({ message: "Product record not found" });
-    }
-
-    return res.status(500).json({ message: "Internal server error" });
-  }
-}
-
 async function findSingleProduct(req, res) {
   try {
     const { id } = req.params;
 
     const product = await prisma.Products.findUnique({
-      where: {
-        id: Number(id),
-      },
+      where: { id: Number(id) },
     });
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Product record not found" });
     }
 
     return res.status(200).json(product);
@@ -129,10 +48,78 @@ async function findSingleProduct(req, res) {
   }
 }
 
+async function createProduct(req, res) {
+  try {
+    const { name, description, price, imageURL, category } = req.body;
+    const activeUserId = req.headers["x-user-id"] || 0;
+
+    const product = await prisma.Products.create({
+      data: { name, description, price: Number(price), imageURL, category },
+    });
+
+    await logActivity({
+      userId: activeUserId,
+      action: "PRODUCT_CREATE",
+      entityId: product.id,
+      details: { name, price: Number(price), category },
+    });
+
+    return res.status(201).json(product);
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+async function updateProduct(req, res) {
+  try {
+    const { id } = req.params;
+    const { name, description, price, imageURL, category } = req.body;
+    const activeUserId = req.headers["x-user-id"] || 0;
+
+    const updatedProduct = await prisma.Products.update({
+      where: { id: Number(id) },
+      data: { name, description, price: Number(price), imageURL, category },
+    });
+
+    await logActivity({
+      userId: activeUserId,
+      action: "PRODUCT_UPDATE",
+      entityId: id,
+      details: { updatedData: { name, price, category } },
+    });
+
+    return res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+async function deleteProduct(req, res) {
+  try {
+    const { id } = req.params;
+    const activeUserId = req.headers["x-user-id"] || 0;
+
+    await prisma.Products.delete({ where: { id: Number(id) } });
+
+    await logActivity({
+      userId: activeUserId,
+      action: "PRODUCT_DELETE",
+      entityId: id,
+    });
+
+    return res.status(200).json({ message: "Product successfully deleted" });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export default {
   findProducts,
+  findSingleProduct,
   createProduct,
   updateProduct,
   deleteProduct,
-  findSingleProduct,
 };
