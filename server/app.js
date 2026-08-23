@@ -8,6 +8,7 @@ import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import activityLogRoutes from "./routes/activityLog.routes.js";
+import reviewRoutes from "./routes/review.routes.js";
 
 import connectMongoDB from "./config/mongodb.js";
 
@@ -43,6 +44,7 @@ app.use("/user", userRoutes);
 app.use("/products", productRoutes);
 app.use("/cart", cartRoutes);
 app.use("/activity-logs", activityLogRoutes);
+app.use("/reviews", reviewRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
