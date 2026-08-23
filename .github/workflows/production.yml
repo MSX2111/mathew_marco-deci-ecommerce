@@ -67,27 +67,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      # IMPORTANT: this job gets a fresh runner,
-      # so dependencies must be installed again.
-      - name: Install frontend dependencies
-        working-directory: client
-        run: npm ci
-
-      - name: Install backend dependencies
-        working-directory: server
-        run: npm ci
-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      # ---------------- FRONTEND ----------------
-
-      - name: Link frontend Vercel project
+      - name: Link frontend project
         working-directory: client
         run: |
           vercel link \
@@ -95,34 +78,15 @@ jobs:
             --project "${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}" \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Pull frontend production environment
-        working-directory: client
-        run: |
-          vercel pull \
-            --yes \
-            --environment production \
-            --token "${{ secrets.VERCEL_TOKEN }}"
-
-      - name: Build frontend
-        working-directory: client
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
-        run: |
-          vercel build \
-            --prod \
-            --token "${{ secrets.VERCEL_TOKEN }}"
-
       - name: Deploy frontend
         working-directory: client
         run: |
           vercel deploy \
-            --prebuilt \
             --prod \
+            --yes \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
-      # ---------------- BACKEND ----------------
-
-      - name: Link backend Vercel project
+      - name: Link backend project
         working-directory: server
         run: |
           vercel link \
@@ -130,25 +94,10 @@ jobs:
             --project "${{ secrets.VERCEL_BACKEND_PROJECT_ID }}" \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Pull backend production environment
-        working-directory: server
-        run: |
-          vercel pull \
-            --yes \
-            --environment production \
-            --token "${{ secrets.VERCEL_TOKEN }}"
-
-      - name: Build backend
-        working-directory: server
-        run: |
-          vercel build \
-            --prod \
-            --token "${{ secrets.VERCEL_TOKEN }}"
-
       - name: Deploy backend
         working-directory: server
         run: |
           vercel deploy \
-            --prebuilt \
             --prod \
+            --yes \
             --token "${{ secrets.VERCEL_TOKEN }}"
