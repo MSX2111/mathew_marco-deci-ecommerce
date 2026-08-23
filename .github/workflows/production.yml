@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
 jobs:
   install:
     name: Install dependencies
@@ -63,6 +67,9 @@ jobs:
     needs: build
     environment: production
 
+    # Only deploy when the change has actually reached main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -72,9 +79,10 @@ jobs:
 
       # ---------------- FRONTEND ----------------
 
-      - name: Link repository to frontend Vercel project
+      - name: Link frontend Vercel project
         run: |
           mkdir -p .vercel
+
           cat > .vercel/project.json <<EOF
           {
             "orgId": "${{ secrets.VERCEL_ORG_ID }}",
@@ -89,14 +97,15 @@ jobs:
             --yes \
             --token="${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Remove frontend Vercel link
+      - name: Remove frontend Vercel configuration
         run: rm -rf .vercel
 
       # ---------------- BACKEND ----------------
 
-      - name: Link repository to backend Vercel project
+      - name: Link backend Vercel project
         run: |
           mkdir -p .vercel
+
           cat > .vercel/project.json <<EOF
           {
             "orgId": "${{ secrets.VERCEL_ORG_ID }}",
@@ -111,5 +120,5 @@ jobs:
             --yes \
             --token="${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Remove backend Vercel link
+      - name: Remove backend Vercel configuration
         run: rm -rf .vercel
