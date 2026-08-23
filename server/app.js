@@ -17,8 +17,15 @@ connectMongoDB();
 
 app.use(helmet());
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
+app.options("*", cors());
 app.use(express.json());
 
 const apiLimiter = rateLimit({
@@ -30,16 +37,6 @@ const apiLimiter = rateLimit({
     message: "Too many requests, please try again later.",
   },
 });
-
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
-
-app.options("*", cors());
 
 app.use(apiLimiter);
 
