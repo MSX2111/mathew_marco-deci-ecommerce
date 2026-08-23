@@ -31,6 +31,16 @@ const apiLimiter = rateLimit({
   },
 });
 
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+app.options("*", cors());
+
 app.use(apiLimiter);
 
 app.get("/health", (req, res) => {
