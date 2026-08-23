@@ -72,10 +72,22 @@ jobs:
         with:
           node-version: 22
 
+      # IMPORTANT: this job gets a fresh runner,
+      # so dependencies must be installed again.
+      - name: Install frontend dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Install backend dependencies
+        working-directory: server
+        run: npm ci
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Link frontend to existing Vercel project
+      # ---------------- FRONTEND ----------------
+
+      - name: Link frontend Vercel project
         working-directory: client
         run: |
           vercel link \
@@ -91,8 +103,10 @@ jobs:
             --environment production \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Build frontend for Vercel
+      - name: Build frontend
         working-directory: client
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: |
           vercel build \
             --prod \
@@ -106,7 +120,9 @@ jobs:
             --prod \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Link backend to existing Vercel project
+      # ---------------- BACKEND ----------------
+
+      - name: Link backend Vercel project
         working-directory: server
         run: |
           vercel link \
@@ -122,7 +138,7 @@ jobs:
             --environment production \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Build backend for Vercel
+      - name: Build backend
         working-directory: server
         run: |
           vercel build \
