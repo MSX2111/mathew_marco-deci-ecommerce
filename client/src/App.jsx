@@ -4,13 +4,13 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoutes";
-import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Shop from "./pages/Shop";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Navbar from "./components/Navbar";
 import Admin from "./pages/Admin";
+import { Navigate } from "react-router-dom";
 
 function App() {
   return (
@@ -30,7 +30,8 @@ function App() {
             </Route>
           </Route>
 
-          <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<Navigate to="/shop" replace />} />
+          <Route path="*" element={<Navigate to="/shop" replace />} />
         </Routes>
       </BrowserRouter>
       <ToastContainer position="top-right" autoClose={3000} theme="dark" />

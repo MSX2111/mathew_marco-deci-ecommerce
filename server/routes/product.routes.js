@@ -12,7 +12,7 @@ import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", authenticate, getProducts);
+router.get("/", getProducts);
 router.get("/:id", authenticate, getProductById);
 
 router.post("/", authenticate, createProduct);
