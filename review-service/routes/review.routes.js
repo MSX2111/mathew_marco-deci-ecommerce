@@ -5,12 +5,10 @@ import {
   createReview,
 } from "../controllers/review.controller.js";
 
-import { authenticate } from "../../server/middleware/auth.middleware.js";
-
 const router = express.Router();
 
-router.get("/product/:productId", authenticate, getProductReviews);
+router.get("/product/:productId", getProductReviews);
 
-router.post("/", authenticate, createReview);
+router.post("/", createReview);
 
 export default router;
