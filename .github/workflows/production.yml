@@ -67,44 +67,39 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      # Frontend
-      - name: Link frontend project
-        working-directory: client
+      # Frontend project
+      - name: Link frontend Vercel project
         run: |
           vercel link \
+            --cwd client \
             --yes \
             --project "${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}" \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
       - name: Deploy frontend
-        working-directory: client
         run: |
           vercel deploy \
+            --cwd client \
             --prod \
             --yes \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
-      # Backend
-      - name: Link backend project
-        working-directory: server
+      # Backend project
+      - name: Link backend Vercel project
         run: |
           vercel link \
+            --cwd server \
             --yes \
             --project "${{ secrets.VERCEL_BACKEND_PROJECT_ID }}" \
             --token "${{ secrets.VERCEL_TOKEN }}"
 
       - name: Deploy backend
-        working-directory: server
         run: |
           vercel deploy \
+            --cwd server \
             --prod \
             --yes \
             --token "${{ secrets.VERCEL_TOKEN }}"
