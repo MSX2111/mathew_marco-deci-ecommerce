@@ -62,6 +62,9 @@ app.use("/products", productRoutes);
 app.use("/cart", cartRoutes);
 app.use("/activity-logs", activityLogRoutes);
 app.use("/reviews", reviewRoutes);
+app.get("/test-error", (req, res, next) => {
+  next(new Error("Test structured logging error"));
+});
 
 app.use((req, res) => {
   res.status(404).json({
