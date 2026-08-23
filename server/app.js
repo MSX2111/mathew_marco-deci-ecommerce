@@ -9,10 +9,38 @@ import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import activityLogRoutes from "./routes/activityLog.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
+import { info } from "./utils/logger.js";
+import { error as logError } from "./utils/logger.js";
 
 import connectMongoDB from "./config/mongodb.js";
 
 const app = express();
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on("finish", () => {
+    info("HTTP request", {
+      method: req.method,
+      path: req.originalUrl,
+      status: res.statusCode,
+      durationMs: Date.now() - start,
+    });
+  });
+
+  next();
+});
+
+app.use((err, req, res, next) => {
+  logError("Unhandled application error", {
+    method: req.method,
+    path: req.originalUrl,
+    error: err.message,
+  });
+
+  res.status(err.status || 500).json({
+    message: "Internal server error",
+  });
+});
 
 connectMongoDB();
 
