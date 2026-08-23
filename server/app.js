@@ -14,7 +14,6 @@ import { error as logError } from "./utils/logger.js";
 
 import connectMongoDB from "./config/mongodb.js";
 
-const app = express();
 app.use((req, res, next) => {
   const start = Date.now();
 
@@ -28,18 +27,6 @@ app.use((req, res, next) => {
   });
 
   next();
-});
-
-app.use((err, req, res, next) => {
-  logError("Unhandled application error", {
-    method: req.method,
-    path: req.originalUrl,
-    error: err.message,
-  });
-
-  res.status(err.status || 500).json({
-    message: "Internal server error",
-  });
 });
 
 connectMongoDB();
@@ -77,6 +64,19 @@ app.use("/reviews", reviewRoutes);
 app.use((req, res) => {
   res.status(404).json({
     message: "API route not found",
+  });
+});
+
+app.use((err, req, res, next) => {
+  logError("Unhandled application error", {
+    method: req.method,
+    path: req.originalUrl,
+    status: err.status || 500,
+    error: err.message,
+  });
+
+  res.status(err.status || 500).json({
+    message: "Internal server error",
   });
 });
 
