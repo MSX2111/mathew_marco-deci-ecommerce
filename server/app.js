@@ -14,6 +14,8 @@ import { error as logError } from "./utils/logger.js";
 
 import connectMongoDB from "./config/mongodb.js";
 
+const app = express();
+
 app.use((req, res, next) => {
   const start = Date.now();
 
