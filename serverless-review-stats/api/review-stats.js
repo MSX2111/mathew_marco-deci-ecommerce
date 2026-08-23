@@ -15,6 +15,7 @@ export default async function handler(req, res) {
   try {
     const client = await getClient();
     const db = client.db();
+
     const reviews = db.collection("reviews");
 
     const result = await reviews
@@ -29,7 +30,7 @@ export default async function handler(req, res) {
       ])
       .toArray();
 
-    const stats = result[0] ?? {
+    const stats = result[0] || {
       totalReviews: 0,
       averageRating: 0,
     };
