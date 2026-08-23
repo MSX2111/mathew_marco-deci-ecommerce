@@ -7,7 +7,6 @@ import rateLimit from "express-rate-limit";
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
-import reviewRoutes from "./routes/review.routes.js";
 import activityLogRoutes from "./routes/activityLog.routes.js";
 
 import connectMongoDB from "./config/mongodb.js";
@@ -43,7 +42,6 @@ app.get("/health", (req, res) => {
 app.use("/user", userRoutes);
 app.use("/products", productRoutes);
 app.use("/cart", cartRoutes);
-app.use("/reviews", reviewRoutes);
 app.use("/activity-logs", activityLogRoutes);
 
 app.use((req, res) => {
