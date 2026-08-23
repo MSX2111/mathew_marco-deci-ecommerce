@@ -67,18 +67,72 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy frontend
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Link frontend to existing Vercel project
+        working-directory: client
         run: |
-          npx vercel@latest deploy ./client \
-            --prod \
+          vercel link \
             --yes \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
-            --scope="${{ secrets.VERCEL_ORG_ID }}"
+            --project "${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}" \
+            --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Pull frontend production environment
+        working-directory: client
+        run: |
+          vercel pull \
+            --yes \
+            --environment production \
+            --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build frontend for Vercel
+        working-directory: client
+        run: |
+          vercel build \
+            --prod \
+            --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy frontend
+        working-directory: client
+        run: |
+          vercel deploy \
+            --prebuilt \
+            --prod \
+            --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Link backend to existing Vercel project
+        working-directory: server
+        run: |
+          vercel link \
+            --yes \
+            --project "${{ secrets.VERCEL_BACKEND_PROJECT_ID }}" \
+            --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Pull backend production environment
+        working-directory: server
+        run: |
+          vercel pull \
+            --yes \
+            --environment production \
+            --token "${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build backend for Vercel
+        working-directory: server
+        run: |
+          vercel build \
+            --prod \
+            --token "${{ secrets.VERCEL_TOKEN }}"
 
       - name: Deploy backend
+        working-directory: server
         run: |
-          npx vercel@latest deploy ./server \
+          vercel deploy \
+            --prebuilt \
             --prod \
-            --yes \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
-            --scope="${{ secrets.VERCEL_ORG_ID }}"
+            --token "${{ secrets.VERCEL_TOKEN }}"
