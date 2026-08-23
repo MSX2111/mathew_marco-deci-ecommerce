@@ -1,5 +1,4 @@
 import axios from "axios";
-
 import logActivity from "../utils/activityLogger.js";
 
 const reviewService = axios.create({
@@ -11,21 +10,21 @@ export const getProductReviews = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    const response = await reviewService.get(`/reviews/product/${productId}`);
+    const response = await reviewService.get(`/reviews/product/${productId}`, {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    });
 
     res.status(200).json(response.data);
   } catch (error) {
     console.error(
-      "Error communicating with review service:",
+      "Review service error:",
       error.response?.data || error.message,
     );
 
-    if (error.response) {
-      return res.status(error.response.status).json(error.response.data);
-    }
-
-    res.status(503).json({
-      message: "Review service unavailable",
+    return res.status(error.response?.status || 503).json({
+      message: error.response?.data?.message || "Review service unavailable",
     });
   }
 };
@@ -37,23 +36,24 @@ export const createReview = async (req, res) => {
 
     const { productId, rating, comment } = req.body;
 
-    if (!productId || !rating || !comment?.trim()) {
-      return res.status(400).json({
-        message: "All review fields are required",
-      });
-    }
-
-    const response = await reviewService.post("/reviews", {
-      productId: Number(productId),
-      userId,
-      userName,
-      rating: Number(rating),
-      comment: comment.trim(),
-    });
+    const response = await reviewService.post(
+      "/reviews",
+      {
+        productId: Number(productId),
+        userId,
+        userName,
+        rating: Number(rating),
+        comment: comment.trim(),
+      },
+      {
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      },
+    );
 
     const review = response.data;
 
-    // Keep activity logging in the main application.
     await logActivity({
       userId,
       userName,
@@ -62,23 +62,18 @@ export const createReview = async (req, res) => {
       targetId: String(productId),
       details: {
         rating: Number(rating),
-        comment: comment.trim(),
       },
     });
 
     res.status(201).json(review);
   } catch (error) {
     console.error(
-      "Error communicating with review service:",
+      "Review service error:",
       error.response?.data || error.message,
     );
 
-    if (error.response) {
-      return res.status(error.response.status).json(error.response.data);
-    }
-
-    res.status(503).json({
-      message: "Review service unavailable",
+    return res.status(error.response?.status || 503).json({
+      message: error.response?.data?.message || "Review service unavailable",
     });
   }
 };
